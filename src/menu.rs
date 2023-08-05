@@ -84,6 +84,7 @@ fn click_play_button(
     }
 }
 
-fn cleanup_menu(mut commands: Commands, button: Query<Entity, With<Button>>) {
+fn cleanup_menu(mut commands: Commands, button: Query<Entity, With<Button>>, camera: Query<Entity, With<Camera2d>>) {
     commands.entity(button.single()).despawn_recursive();
+    commands.entity(camera.single()).despawn_recursive();
 }

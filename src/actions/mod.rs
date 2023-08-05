@@ -1,5 +1,8 @@
+use bevy::ecs::event::ManualEventReader;
+use bevy::input::mouse::MouseMotion;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 
 use crate::actions::game_control::{get_movement, GameControl};
 use crate::player::Player;
@@ -17,7 +20,7 @@ impl Plugin for ActionsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Actions>().add_systems(
             Update,
-            set_movement_actions.run_if(in_state(GameState::Playing)),
+            (set_movement_actions, mouse_control).run_if(in_state(GameState::Playing)),
         );
     }
 }
@@ -25,7 +28,27 @@ impl Plugin for ActionsPlugin {
 #[derive(Default, Resource)]
 pub struct Actions {
     pub player_movement: Option<Vec2>,
+    pub mouse_angle: f32
 }
+
+
+
+pub fn mouse_control(
+    primary_window: Query<&Window, With<PrimaryWindow>>,
+    mut actions: ResMut<Actions>,
+) {
+    if let Ok(window) = primary_window.get_single() {
+        if let Some(position) = window.cursor_position() {
+            let win_size = Vec2 {x: window.width(), y: window.height() } / 2.0;
+            let angle = (position - win_size).angle_between(Vec2::NEG_Y);
+            println!("Cursor is inside the primary window, at {:?}", position);
+            println!("Angle: {}", angle.to_degrees());
+            actions.mouse_angle = angle;
+        }
+    }
+
+}
+
 
 pub fn set_movement_actions(
     mut actions: ResMut<Actions>,
