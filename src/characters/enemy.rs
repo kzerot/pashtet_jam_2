@@ -31,7 +31,7 @@ impl Plugin for EnemyPlugin {
             timer: Timer::from_seconds(1.0, TimerMode::Repeating)
         })
         //.add_systems(OnEnter(GameState::Playing), spawn_enemy)
-        .add_systems(Update, (move_enemy, spawn_enemy_timeout, check_death).run_if(in_state(GameState::Playing)))
+        .add_systems(Update, (move_enemy, spawn_enemy_timeout, check_death, check_collisions).run_if(in_state(GameState::Playing)))
         ;
     }
 }
@@ -68,15 +68,22 @@ fn spawn_enemy(commands: &mut Commands,
 }
 
 fn move_enemy(
+    mut commands: Commands,
+    day_night: Res<DayNight>,
     time: Res<Time>,
-    mut enemy_query: Query<(&mut Transform, &Enemy), Without<Player>>,
+    mut enemy_query: Query<(&mut Transform, &Enemy, Entity, &ComputedVisibility), Without<Player>>,
     player_query: Query<&Transform, (Without<Enemy>, With<Player>)>,
 
 ) {
     let player = player_query.single();
     
-    for (mut tr, enemy) in enemy_query.iter_mut(){
+    for (mut tr, enemy, entity, visibility) in enemy_query.iter_mut(){
+        
         let mut direction = player.translation - tr.translation;
+        if !day_night.is_night {
+            direction = -direction;
+
+        }
         // let near = direction.length_squared() <= 6000.0;
         direction.z = 0.0;
         direction = direction.normalize();
@@ -84,6 +91,17 @@ fn move_enemy(
         let speed = enemy.speed;
         let movement = direction * speed * time.delta_seconds();
         tr.translation += movement;
+        
+        
+        if !day_night.is_night {
+            if !visibility.is_visible_in_view() {
+                if let Some(ent) = commands.get_entity(entity) {
+                    ent.despawn_recursive();
+                    info!("Despawn fleed enemy");
+                }
+            }
+        }
+
 
     }
 }
@@ -111,7 +129,6 @@ fn spawn_enemy_timeout(
             }
         }
     }
-
 }
 
 fn check_death(
@@ -122,5 +139,19 @@ fn check_death(
         if hp.0 <= 0.0 {
             commands.entity(entity).despawn_recursive();
         }
+    }
+}
+
+fn check_collisions(
+    time: Res<Time>,
+    query: Query<&Transform, With<Enemy>>,
+    mut query_player: Query<(&mut Hp, &Transform), With<Player>>
+) {
+    let (mut hp, player_tr) = query_player.single_mut();
+
+    for transform in query.iter() {
+            if transform.translation.distance_squared(player_tr.translation) <= 900.0 {
+                hp.0 -= 2.0 * time.delta_seconds();
+            }
     }
 }

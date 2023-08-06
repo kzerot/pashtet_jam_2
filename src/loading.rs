@@ -1,5 +1,5 @@
 use crate::GameState;
-use bevy::{prelude::*, render::{render_resource::{SamplerDescriptor, AddressMode}, texture::{ImageType, CompressedImageFormats, ImageSampler}}};
+use bevy::{prelude::*};
 use bevy_asset_loader::prelude::*;
 use bevy_kira_audio::AudioSource;
 
@@ -57,4 +57,10 @@ pub struct TextureAssets {
 
     #[asset(path = "textures/bullet.png")]
     pub texture_bullet: Handle<Image>,
+    
+    #[asset(path = "textures/chest_opened.png")]
+    pub texture_chest_opened: Handle<Image>,
+
+    #[asset(path = "textures/chest_closed.png")]
+    pub texture_chest_closed: Handle<Image>,
 }

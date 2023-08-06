@@ -68,13 +68,17 @@ fn check_collisions(
 ) {
     for (entity, bullet_transform, bullet) in query.iter() {
         if bullet.time_alive >= 5.0 {
-            commands.entity(entity).despawn_recursive();
+            if let Some(ent) = commands.get_entity(entity){
+                ent.despawn_recursive();
+            }
             continue;
         }
         for (mut enemy_hp, enemy_transform) in query_enemies.iter_mut() {
             if bullet_transform.translation.distance_squared(enemy_transform.translation) <= 25.0*25.0 {
                 enemy_hp.0 -= bullet.damage;
-                commands.entity(entity).despawn_recursive();
+                if let Some(ent) = commands.get_entity(entity){
+                    ent.despawn_recursive();
+                }
             }
         }
     }

@@ -1,14 +1,14 @@
-use bevy::{prelude::{Plugin, Component, OnEnter, Commands, Res, Transform, Resource, Entity, ResMut, Update, Query, With, Camera2d, info, IntoSystemConfigs, in_state, DespawnRecursiveExt, DirectionalLightBundle, Color, PointLightBundle, Without, EventWriter, Event}, sprite::{SpriteBundle, Sprite, TextureAtlasSprite}, math::vec3, utils::HashMap, time::Time};
+use bevy::{prelude::{Plugin, Component, OnEnter, Commands, Res, Transform, Resource, Entity, ResMut, Update, Query, With, Camera2d, info, IntoSystemConfigs, in_state, DespawnRecursiveExt, Color, PointLightBundle, Without, EventWriter, Event}, sprite::{SpriteBundle, Sprite, TextureAtlasSprite}, math::vec3, utils::HashMap, time::Time};
 
-use crate::{loading::TextureAssets, GameState, characters::{player::Player, enemy::Enemy, bullets::Bullet}};
+use crate::{loading::TextureAssets, GameState, characters::{enemy::Enemy, bullets::Bullet}};
 
 pub struct MapPlugin;
 
 #[derive(Resource)]
 pub struct DayNight {
-    current_day_time: f32,
-    current_night_time: f32,
-    full_day_time: f32,
+    pub current_day_time: f32,
+    pub current_night_time: f32,
+    pub full_day_time: f32,
     pub time: f32,
     pub is_night: bool
 }
@@ -39,8 +39,8 @@ impl Plugin for MapPlugin {
             time: 0.0,
             is_night: false,
         })
-        .add_systems(OnEnter(GameState::Playing), (spawn_map))
-        .add_systems(Update, (check_map, (day_night_cycle, day_night_coloring).chain()).run_if(in_state(GameState::Playing)))
+        .add_systems(OnEnter(GameState::Playing), spawn_map)
+        .add_systems(Update, ((check_map, day_night_cycle, day_night_coloring).chain()).run_if(in_state(GameState::Playing)))
         ;
     }
 }
@@ -129,6 +129,7 @@ pub fn spawn_map(
 }
 
 pub fn check_map(
+    day_night: Res<DayNight>,
     mut command: Commands,
     mut map: ResMut<Map>,
     textures: Res<TextureAssets>,
@@ -156,6 +157,25 @@ pub fn check_map(
                 map.tiles.remove(&pos);
             }
         }
+
+
+        // Spawn tile with needed color
+        let light_intency;
+        let time_percent = day_night.time/day_night.full_day_time;
+        
+        if time_percent > day_night.current_day_time - 0.1 && time_percent <= day_night.current_day_time {
+            light_intency = (day_night.current_day_time - time_percent) * 10.0;
+        }
+        else if time_percent > 0.0 && time_percent <= 0.1 {
+            light_intency = time_percent * 10.0;
+        } else if day_night.is_night {
+            light_intency = 0.0;
+        } else {
+            light_intency = 1.0;
+        }
+        let target_color_vec = vec3(0.4, 0.4, 0.7);
+        let current_color_vec = target_color_vec.lerp(vec3(1., 1., 1.), light_intency);
+
         for pos in new_positions.iter() {
             if !map.tiles.contains_key(pos) {
                 let position = vec3(
@@ -167,6 +187,10 @@ pub fn check_map(
                     SpriteBundle{
                         texture: textures.texture_ground.clone(),
                         transform: Transform::from_translation(position),
+                        sprite: Sprite {
+                            color: Color::rgb(current_color_vec.x, current_color_vec.y, current_color_vec.z),
+                            ..Default::default()
+                        },
                         ..Default::default()
                     }
                 ).id();

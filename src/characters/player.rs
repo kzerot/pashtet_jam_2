@@ -16,8 +16,11 @@ pub struct Player;
 #[derive(Component)]
 pub struct Weapon {
     cd: f32,
-    from_shot: f32
+    from_shot: f32,
+    pub name: String
 }
+#[derive(Component)]
+pub struct Energy(pub i32);
 
 
 /// This plugin handles player related stuff like movement
@@ -104,9 +107,11 @@ fn spawn_player(mut commands: Commands,
     
     .insert(Player)
     .insert(Hp(100.0))
+    .insert(Energy(100))
     .insert(Weapon {
         cd: 0.1,
-        from_shot: 0.0
+        from_shot: 0.0,
+        name: "Base Eradicator".into()
     });
 
 }
@@ -160,16 +165,17 @@ fn move_player(
 
 fn fire(
     mut commands: Commands,
-    mut query: Query<(&Transform, &mut Weapon), With<Player>>, 
+    mut query: Query<(&Transform, &mut Weapon, &mut Energy), With<Player>>, 
     buttons: Res<Input<MouseButton>>,
     textures: Res<TextureAssets>,
 ){
     if buttons.pressed(MouseButton::Left) {
-        let (pl_transform, mut weapon) = query.single_mut();
-        if weapon.from_shot > weapon.cd {
+        let (pl_transform, mut weapon, mut energy) = query.single_mut();
+        if weapon.from_shot > weapon.cd && energy.0 > 0 {
             weapon.from_shot = 0.0;
             let velocity = (pl_transform.rotation * Vec3::Y).normalize_or_zero();
-            shot_bullet(&mut commands, &textures, pl_transform.translation + velocity*25.0, velocity, 1.0, 300.0)
+            shot_bullet(&mut commands, &textures, pl_transform.translation + velocity*25.0, velocity, 1.0, 300.0);
+            energy.0 -= 1;
         }
     }
 }
