@@ -60,5 +60,7 @@ bevy_egui = "0.21"
 winit = { version = "0.28", default-features = false }
 image = { version = "0.24", default-features = false }
 
+lazy_static = "1.4.0"
+
 [build-dependencies]
 embed-resource = "1.4"

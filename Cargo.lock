@@ -570,6 +570,7 @@ dependencies = [
  "bevy_kira_audio",
  "embed-resource",
  "image",
+ "lazy_static",
  "rand",
  "winit",
 ]

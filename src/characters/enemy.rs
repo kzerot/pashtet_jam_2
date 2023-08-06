@@ -40,21 +40,22 @@ impl Plugin for EnemyPlugin {
 fn spawn_enemy(commands: &mut Commands, 
     textures: &Res<TextureAssets>,
     texture_atlases: &mut ResMut<Assets<TextureAtlas>>, 
-    pos: Vec3
+    pos: Vec3,
+    strength: f32
 ) {
 
     let texture_atlas =
         TextureAtlas::from_grid(textures.texture_enemy.clone(), Vec2::new(200.0, 200.0), 4, 4, None, None);
     let texture_atlas_enemy_handle = texture_atlases.add(texture_atlas);
     let animation_indices = AnimationIndices { first: 0, last: 15 };
-
+    let true_strength = (strength + (rand::random::<f32>() - 0.5) * 0.3).clamp(0.2, 2.0);
     commands.spawn( (
         SpriteSheetBundle {
             texture_atlas: texture_atlas_enemy_handle,
             sprite: TextureAtlasSprite::new(animation_indices.first),
             transform:Transform{
                 translation: pos,
-                scale: vec3(0.25, 0.25, 0.25),
+                scale: Vec3::splat(0.25 * true_strength),
                 ..Default::default()
             },
             ..default()
@@ -63,7 +64,7 @@ fn spawn_enemy(commands: &mut Commands,
         AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
     ))
     .insert(Enemy { speed : 120.0 + rand::random::<f32>()*20.0 })
-    .insert(Hp(2.0));
+    .insert(Hp(5.0 + 10.0 * true_strength));
 
 }
 
@@ -121,11 +122,13 @@ fn spawn_enemy_timeout(
         timer.timer.tick(time.delta());
         if timer.timer.finished() {
             let base_pos = player_query.single().translation;
-            for _ in 0..3 {
+            let count = (day_night.current_night_time * 10.0).round() as i32;
+            for _ in 0..count {
                 let distance = 600.0 + rand::random::<f32>() * 600.0;
                 let angle = PI * 2.0 * rand::random::<f32>();
                 let pos = vec3(angle.cos() * distance, angle.sin() * distance, 0.05) + base_pos;
-                spawn_enemy(&mut commands, &textures, &mut texture_atlases, pos);
+                let strength = (day_night.day as f32 / 10.0) + 0.5;
+                spawn_enemy(&mut commands, &textures, &mut texture_atlases, pos, strength);
             }
         }
     }
@@ -150,7 +153,7 @@ fn check_collisions(
     let (mut hp, player_tr) = query_player.single_mut();
 
     for transform in query.iter() {
-            if transform.translation.distance_squared(player_tr.translation) <= 900.0 {
+            if transform.translation.distance_squared(player_tr.translation) <= 50. * 50. {
                 hp.0 -= 2.0 * time.delta_seconds();
             }
     }

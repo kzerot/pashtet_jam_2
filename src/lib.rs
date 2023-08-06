@@ -12,6 +12,7 @@ use actions::ActionsPlugin;
 use audio::InternalAudioPlugin;
 use bevy_egui::EguiPlugin;
 use characters::bullets::BulletPlugin;
+use characters::turret::TurretPlugin;
 use loading::LoadingPlugin;
 use menu::MenuPlugin;
 use characters::player::PlayerPlugin;
@@ -49,6 +50,7 @@ impl Plugin for GamePlugin {
             InternalAudioPlugin,
             PlayerPlugin,
             EnemyPlugin,
+            TurretPlugin,
             MapPlugin,
             BulletPlugin,
             EguiPlugin,

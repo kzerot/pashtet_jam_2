@@ -1,6 +1,8 @@
-use bevy::{prelude::{Plugin, Component, OnEnter, Commands, Res, Transform, Resource, Entity, ResMut, Update, Query, With, Camera2d, info, IntoSystemConfigs, in_state, DespawnRecursiveExt, Color, PointLightBundle, Without, EventWriter, Event}, sprite::{SpriteBundle, Sprite, TextureAtlasSprite}, math::vec3, utils::HashMap, time::Time};
+use std::f32::consts::PI;
 
-use crate::{loading::TextureAssets, GameState, characters::{enemy::Enemy, bullets::Bullet}};
+use bevy::{prelude::{Plugin, Component, OnEnter, Commands, Res, Transform, Resource, Entity, ResMut, Update, Query, With, Camera2d, info, IntoSystemConfigs, in_state, DespawnRecursiveExt, Color, PointLightBundle, Without, EventWriter, Event, Vec3, Quat}, sprite::{SpriteBundle, Sprite, TextureAtlasSprite}, math::vec3, utils::HashMap, time::Time};
+
+use crate::{loading::TextureAssets, GameState, characters::{enemy::Enemy, bullets::Bullet}, interactive_items::chest::{Chest, open_chest}};
 
 pub struct MapPlugin;
 
@@ -10,7 +12,8 @@ pub struct DayNight {
     pub current_night_time: f32,
     pub full_day_time: f32,
     pub time: f32,
-    pub is_night: bool
+    pub is_night: bool,
+    pub day: i32
 }
 
 #[derive(Component)]
@@ -19,7 +22,8 @@ struct Ground;
 #[derive(Resource, Default)]
 pub struct Map {
     pub tiles: HashMap<(i32, i32), Entity>,
-    pub last_position: (i32, i32)
+    pub last_position: (i32, i32),
+    pub chestes_spawned: Vec<(i32, i32)>
 }
 
 // Event
@@ -38,9 +42,10 @@ impl Plugin for MapPlugin {
             full_day_time: 60.0,
             time: 0.0,
             is_night: false,
+            day: 1
         })
         .add_systems(OnEnter(GameState::Playing), spawn_map)
-        .add_systems(Update, ((check_map, day_night_cycle, day_night_coloring).chain()).run_if(in_state(GameState::Playing)))
+        .add_systems(Update, (open_chest, (check_map, day_night_cycle, day_night_coloring).chain()).run_if(in_state(GameState::Playing)))
         ;
     }
 }
@@ -54,6 +59,7 @@ fn day_night_cycle(
     day_night.time += time.delta_seconds();
     if day_night.time >= day_night.full_day_time {
         info!("New day");
+        day_night.day += 1;
         day_night.time = 0.0;
         day_night.current_day_time = (day_night.current_day_time - 0.05).clamp(0.1, 0.9);
         day_night.current_night_time = (day_night.current_night_time + 0.05).clamp(0.1, 0.9);
@@ -119,7 +125,11 @@ pub fn spawn_map(
                     ..Default::default()
                 }
             ).id();
-            map.tiles.insert((x,y), id);
+            map.tiles.insert((x,y), id);                
+            if !map.chestes_spawned.contains(&(x,y)){
+                map.chestes_spawned.push((x,y));
+                spawn_chests(&mut command, &textures, position, Color::WHITE);
+            }
         }
     }
     command.spawn(PointLightBundle {
@@ -175,7 +185,7 @@ pub fn check_map(
         }
         let target_color_vec = vec3(0.4, 0.4, 0.7);
         let current_color_vec = target_color_vec.lerp(vec3(1., 1., 1.), light_intency);
-
+        let color = Color::rgb(current_color_vec.x, current_color_vec.y, current_color_vec.z);
         for pos in new_positions.iter() {
             if !map.tiles.contains_key(pos) {
                 let position = vec3(
@@ -188,15 +198,50 @@ pub fn check_map(
                         texture: textures.texture_ground.clone(),
                         transform: Transform::from_translation(position),
                         sprite: Sprite {
-                            color: Color::rgb(current_color_vec.x, current_color_vec.y, current_color_vec.z),
+                            color: color,
                             ..Default::default()
                         },
                         ..Default::default()
                     }
                 ).id();
                 map.tiles.insert(*pos, id);
+                if !map.chestes_spawned.contains(pos){
+                    map.chestes_spawned.push(*pos);
+                    spawn_chests(&mut command, &textures, position, color)
+                }
 
             }
         }
+    }
+}
+
+fn spawn_chests(
+    commands: &mut Commands,
+    textures: &Res<TextureAssets>,
+    pos: Vec3,
+    color: Color,
+) {
+    let chest_num = 2 + (rand::random::<f32>() * 6.0) as i32;
+    for _ in 0..chest_num {
+        let new_pos = pos + vec3(
+            pos.x - 128.0 + rand::random::<f32>() * 256.0,
+            pos.y - 128.0 + rand::random::<f32>() * 256.0,
+            0.1
+        );
+        let mut chest = Chest::default();
+        chest.generate();
+        commands.spawn(
+            SpriteBundle {
+                texture: textures.texture_chest_closed.clone(),
+                transform: Transform::from_translation(new_pos)
+                    .with_scale(Vec3::splat(0.25))
+                    .with_rotation(Quat::from_axis_angle(Vec3::Z, PI*2.0* rand::random::<f32>())),
+                sprite: Sprite {
+                    color: color,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }
+        ).insert(chest);
     }
 }

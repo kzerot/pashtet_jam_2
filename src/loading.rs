@@ -63,4 +63,7 @@ pub struct TextureAssets {
 
     #[asset(path = "textures/chest_closed.png")]
     pub texture_chest_closed: Handle<Image>,
+    
+    #[asset(path = "textures/turret.png")]
+    pub texture_turret: Handle<Image>,
 }
