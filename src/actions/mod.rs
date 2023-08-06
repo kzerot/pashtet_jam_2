@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 use crate::actions::game_control::{get_movement, GameControl};
-use crate::player::Player;
+use crate::characters::player::Player;
 use crate::GameState;
 
 mod game_control;
@@ -41,8 +41,6 @@ pub fn mouse_control(
         if let Some(position) = window.cursor_position() {
             let win_size = Vec2 {x: window.width(), y: window.height() } / 2.0;
             let angle = (position - win_size).angle_between(Vec2::NEG_Y);
-            println!("Cursor is inside the primary window, at {:?}", position);
-            println!("Angle: {}", angle.to_degrees());
             actions.mouse_angle = angle;
         }
     }

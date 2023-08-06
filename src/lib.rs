@@ -4,16 +4,20 @@ mod actions;
 mod audio;
 mod loading;
 mod menu;
-mod player;
+mod characters;
+mod map;
 
-use crate::actions::ActionsPlugin;
-use crate::audio::InternalAudioPlugin;
-use crate::loading::LoadingPlugin;
-use crate::menu::MenuPlugin;
-use crate::player::PlayerPlugin;
+use actions::ActionsPlugin;
+use audio::InternalAudioPlugin;
+use characters::bullets::BulletPlugin;
+use loading::LoadingPlugin;
+use menu::MenuPlugin;
+use characters::player::PlayerPlugin;
+use characters::enemy::EnemyPlugin;
+use map::MapPlugin;
 
 use bevy::app::App;
-#[cfg(debug_assertions)]
+// #[cfg(debug_assertions)]
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 
@@ -41,6 +45,9 @@ impl Plugin for GamePlugin {
             ActionsPlugin,
             InternalAudioPlugin,
             PlayerPlugin,
+            EnemyPlugin,
+            MapPlugin,
+            BulletPlugin
         ));
 
         // #[cfg(debug_assertions)]

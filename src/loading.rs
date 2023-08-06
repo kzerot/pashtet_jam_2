@@ -1,5 +1,5 @@
 use crate::GameState;
-use bevy::prelude::*;
+use bevy::{prelude::*, render::{render_resource::{SamplerDescriptor, AddressMode}, texture::{ImageType, CompressedImageFormats, ImageSampler}}};
 use bevy_asset_loader::prelude::*;
 use bevy_kira_audio::AudioSource;
 
@@ -10,10 +10,11 @@ pub struct LoadingPlugin;
 /// If interested, take a look at <https://bevy-cheatbook.github.io/features/assets.html>
 impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_loading_state(
+        app
+        .add_loading_state(
             LoadingState::new(GameState::Loading).continue_to_state(GameState::Menu),
         )
-        .add_collection_to_loading_state::<_, FontAssets>(GameState::Loading)
+           .add_collection_to_loading_state::<_, FontAssets>(GameState::Loading)
         .add_collection_to_loading_state::<_, AudioAssets>(GameState::Loading)
         .add_collection_to_loading_state::<_, TextureAssets>(GameState::Loading);
     }
@@ -47,4 +48,13 @@ pub struct TextureAssets {
 
     #[asset(path = "textures/shadow.png")]
     pub texture_shadow: Handle<Image>,
+
+    #[asset(path = "textures/ground.png")]
+    pub texture_ground: Handle<Image>,
+
+    #[asset(path = "textures/enemy.png")]
+    pub texture_enemy: Handle<Image>,
+
+    #[asset(path = "textures/bullet.png")]
+    pub texture_bullet: Handle<Image>,
 }
