@@ -4,6 +4,7 @@ use crate::GameState;
 use crate::actions::Actions;
 use crate::interactive_items::chest::WEAPONS;
 use crate::loading::TextureAssets;
+use crate::map::DayNight;
 use crate::ui::UiLog;
 
 use bevy::math::vec3;
@@ -62,7 +63,7 @@ impl Plugin for PlayerPlugin {
             .init_resource::<TemporaryItems>()
             .init_resource::<Inventoty>()
             .add_systems(OnEnter(GameState::Playing), spawn_player)
-            .add_systems(Update, (check_resolution, move_player, move_camera, animate_sprite, fire, change_weapon, place_turret, check_death)
+            .add_systems(Update, (check_resolution, move_player, move_camera, animate_sprite, fire, change_weapon, place_turret, check_win, check_death)
                 .run_if(in_state(GameState::Playing)));
     }
 }
@@ -86,6 +87,15 @@ fn check_death(
 ){
     if query.single().0 <= 0.0 {
         state.set(GameState::MenuDeath);
+    }
+}
+
+fn check_win(
+    mut state: ResMut<NextState<GameState>>,
+    day_night: Res<DayNight>
+){
+    if day_night.day == 11 {
+        state.set(GameState::MenuWin);
     }
 }
 

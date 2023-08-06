@@ -1,5 +1,5 @@
-use bevy::{utils::HashMap, prelude::{Component, Commands, Res, Input, KeyCode, Query, Transform, With, Handle, Image, ResMut, info}, sprite::Sprite, render::render_resource::Texture, time::Time};
-use rand::{Rng, random, seq::SliceRandom};
+use bevy::{prelude::{Component, Res, Input, KeyCode, Query, Transform, With, Handle, Image, ResMut}, time::Time};
+use rand::{Rng, seq::SliceRandom};
 
 use crate::{loading::TextureAssets, characters::player::{Player, Energy, Weapon, WeaponPattern, TemporaryItems, Inventoty}, ui::UiLog};
 use lazy_static::lazy_static;

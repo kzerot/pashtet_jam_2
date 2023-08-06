@@ -39,8 +39,8 @@ impl Plugin for MapPlugin {
         .insert_resource(DayNight {
             current_day_time: 0.7,
             current_night_time: 0.3,
-            full_day_time: 60.0,
-            time: 0.0,
+            full_day_time: 120.0,
+            time: 60.0,
             is_night: false,
             day: 1
         })

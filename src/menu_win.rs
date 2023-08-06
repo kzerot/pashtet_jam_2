@@ -2,16 +2,16 @@ use crate::loading::FontAssets;
 use crate::GameState;
 use bevy::prelude::*;
 
-pub struct MenuPlugin;
+pub struct MenuWinPlugin;
 
 /// This plugin is responsible for the game menu (containing only one button...)
-/// The menu is only drawn during the State `GameState::Menu` and is removed when that state is exited
-impl Plugin for MenuPlugin {
+/// The menu is only drawn during the State `GameState::MenuWin` and is removed when that state is exited
+impl Plugin for MenuWinPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ButtonColors>()
-            .add_systems(OnEnter(GameState::Menu), setup_menu)
-            .add_systems(Update, click_play_button.run_if(in_state(GameState::Menu)))
-            .add_systems(OnExit(GameState::Menu), cleanup_menu);
+            .add_systems(OnEnter(GameState::MenuWin), setup_menu)
+            .add_systems(Update, click_play_button.run_if(in_state(GameState::MenuWin)))
+            .add_systems(OnExit(GameState::MenuWin), cleanup_menu);
     }
 }
 
@@ -36,6 +36,8 @@ fn setup_menu(
     button_colors: Res<ButtonColors>,
 ) {
     commands.spawn(Camera2dBundle::default());
+
+
     commands.spawn(NodeBundle {
         style: Style {
             width: Val::Percent(100.0),
@@ -80,7 +82,7 @@ fn setup_menu(
                 });
 
             parent.spawn(TextBundle::from_section(
-                "Your spaceship landed on some hostile planet. You have NO HOME here! You have no fuel, no food and you should wait 10 days before you will be rescued!",
+                "The spaceship landed and you returned to your HOME! Yay.",
                 TextStyle {
                     font: font_assets.fira_sans.clone(),
                     font_size: 40.0,
@@ -89,6 +91,7 @@ fn setup_menu(
             ));
         });
     });
+
 }
 
 fn click_play_button(

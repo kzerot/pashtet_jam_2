@@ -2,9 +2,9 @@ use std::f32::consts::PI;
 
 use crate::loading::TextureAssets;
 use crate::GameState;
-use crate::characters::base_character::{AnimationIndices, AnimationTimer, Hp};
-use crate::characters::player::Player;
-use crate::map::DayNight;
+
+
+
 use bevy::math::{vec3, vec2};
 use bevy::prelude::*;
 

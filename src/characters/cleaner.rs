@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{interactive_items::chest::Chest, map::{Map, DayNight}, ui::UiLog, GameState};
+use crate::{map::{Map, DayNight}, ui::UiLog, GameState};
 
-use super::{bullets::Bullet, enemy::{Enemy, SpawnTimer}, player::{Inventoty, TemporaryItems}};
+use super::{player::{Inventoty, TemporaryItems}};
 pub struct CleanerPlugin;
 impl Plugin for CleanerPlugin {
     fn build(&self, app: &mut App) {
