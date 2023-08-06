@@ -12,7 +12,7 @@ use bevy::prelude::*;
 pub struct EnemyPlugin;
 
 #[derive(Resource)]
-struct SpawnTimer {
+pub struct SpawnTimer {
     /// How often to spawn a new bomb? (repeating timer)
     timer: Timer,
 }

@@ -62,7 +62,8 @@ impl Plugin for PlayerPlugin {
             .init_resource::<TemporaryItems>()
             .init_resource::<Inventoty>()
             .add_systems(OnEnter(GameState::Playing), spawn_player)
-            .add_systems(Update, (check_resolution, move_player, move_camera, animate_sprite, fire, change_weapon, place_turret).run_if(in_state(GameState::Playing)));
+            .add_systems(Update, (check_resolution, move_player, move_camera, animate_sprite, fire, change_weapon, place_turret, check_death)
+                .run_if(in_state(GameState::Playing)));
     }
 }
 
@@ -79,6 +80,14 @@ fn check_resolution(mut query: Query<&mut OrthographicProjection, With<Camera>>,
     }
 }
 
+fn check_death(
+    mut state: ResMut<NextState<GameState>>,
+    query: Query<&Hp, With<Player>>
+){
+    if query.single().0 <= 0.0 {
+        state.set(GameState::MenuDeath);
+    }
+}
 
 fn spawn_player(mut commands: Commands, 
     textures: Res<TextureAssets>,

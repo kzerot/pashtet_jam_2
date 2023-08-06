@@ -13,6 +13,8 @@ impl Plugin for BulletPlugin {
     }
 }
 
+
+
 #[derive(Component)]
 pub struct Bullet {
     damage: f32,

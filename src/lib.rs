@@ -8,10 +8,13 @@ mod characters;
 mod map;
 mod interactive_items;
 mod ui;
+mod menu_death;
 use actions::ActionsPlugin;
 use audio::InternalAudioPlugin;
 use bevy_egui::EguiPlugin;
 use characters::bullets::BulletPlugin;
+
+use characters::cleaner::CleanerPlugin;
 use characters::turret::TurretPlugin;
 use loading::LoadingPlugin;
 use menu::MenuPlugin;
@@ -23,6 +26,7 @@ use bevy::app::App;
 // #[cfg(debug_assertions)]
 // use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
+use menu_death::MenuDeathPlugin;
 use ui::UiPlugin;
 
 // This example game uses States to separate logic
@@ -37,6 +41,7 @@ enum GameState {
     Playing,
     // Here the menu is drawn and waiting for player interaction
     Menu,
+    MenuDeath,
 }
 
 pub struct GamePlugin;
@@ -46,6 +51,8 @@ impl Plugin for GamePlugin {
         app.add_state::<GameState>().add_plugins((
             LoadingPlugin,
             MenuPlugin,
+            MenuDeathPlugin,
+            CleanerPlugin,
             ActionsPlugin,
             InternalAudioPlugin,
             PlayerPlugin,
